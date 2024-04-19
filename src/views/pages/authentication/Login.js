@@ -46,6 +46,7 @@ import illustrationsDark from '@src/assets/images/pages/login-v2-dark.svg'
 
 // ** Styles
 import '@styles/react/pages/page-authentication.scss'
+import axios from 'axios'
 
 const ToastContent = ({ t, name, role }) => {
   return (
@@ -65,8 +66,8 @@ const ToastContent = ({ t, name, role }) => {
 }
 
 const defaultValues = {
-  password: 'admin',
-  loginEmail: 'admin@demo.com'
+  password: 'tahir123',
+  loginEmail: 'tahir@gmail.com'
 }
 
 const Login = () => {
@@ -84,33 +85,49 @@ const Login = () => {
 
   const source = skin === 'dark' ? illustrationsDark : illustrationsLight
 
-  const onSubmit = data => {
-    if (Object.values(data).every(field => field.length > 0)) {
-      useJwt
-        .login({ email: data.loginEmail, password: data.password })
-        .then(res => {
-          const data = { ...res.data.userData, accessToken: res.data.accessToken, refreshToken: res.data.refreshToken }
-          dispatch(handleLogin(data))
-          ability.update(res.data.userData.ability)
-          navigate(getHomeRouteForLoggedInUser(data.role))
-          toast(t => (
-            <ToastContent t={t} role={data.role || 'admin'} name={data.fullName || data.username || 'John Doe'} />
-          ))
-        })
-        .catch(err => setError('loginEmail', {
-            type: 'manual',
-            message: err.response.data.error
-          })
-        )
-    } else {
-      for (const key in data) {
-        if (data[key].length === 0) {
-          setError(key, {
-            type: 'manual'
-          })
-        }
+  // const onSubmit = data => {
+  //   if (Object.values(data).every(field => field.length > 0)) {
+  //     useJwt
+  //       .login({ email: data.loginEmail, password: data.password })
+  //       .then(res => {
+  //         const data = { ...res.data.userData, accessToken: res.data.accessToken, refreshToken: res.data.refreshToken }
+  //         dispatch(handleLogin(data))
+  //         ability.update(res.data.userData.ability)
+  //         navigate(getHomeRouteForLoggedInUser(data.role))
+  //         toast(t => (
+  //           <ToastContent t={t} role={data.role || 'admin'} name={data.fullName || data.username || 'John Doe'} />
+  //         ))
+  //       })
+  //       .catch(err => setError('loginEmail', {
+  //           type: 'manual',
+  //           message: err.response.data.error
+  //         })
+  //       )
+  //   } else {
+  //     for (const key in data) {
+  //       if (data[key].length === 0) {
+  //         setError(key, {
+  //           type: 'manual'
+  //         })
+  //       }
+  //     }
+  //   }
+  // }
+
+  async function onSubmit({loginEmail, password}) {
+    const { data: { user } } = (await axios.post('http://localhost:3005/api/v1/auth/login', { email: loginEmail, password })).data;
+    dispatch(handleLogin(user))
+    ability.update([
+      {
+        action: 'manage',
+        subject: 'all'
       }
-    }
+    ]
+    )
+    navigate('/pages/blog/list')
+    toast(t => (
+      <ToastContent t={t} role={user.role || 'admin'} name={user.fullName || user.userName || 'John Doe'} />
+    ))
   }
 
   return (
@@ -182,7 +199,7 @@ const Login = () => {
               <div className='alert-body font-small-2'>
                 <p>
                   <small className='me-50'>
-                    <span className='fw-bold'>Admin:</span> admin@demo.com | admin
+                    <span className='fw-bold'>Admin:</span> tahir@gmail.com | tahir123
                   </small>
                 </p>
                 <p>
