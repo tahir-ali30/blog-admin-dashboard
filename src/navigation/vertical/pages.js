@@ -33,6 +33,56 @@ export default [
       }
     ]
   },
+  {
+    id: 'category',
+    title: 'Category',
+    icon: <Circle size={12} />,
+    children: [
+      {
+        id: 'categoryAdd',
+        title: 'Add',
+        permissions: ['admin', 'editor'],
+        navLink: '/pages/category/add'
+      },
+      {
+        id: 'categoryList',
+        title: 'List',
+        permissions: ['admin', 'editor'],
+        navLink: '/pages/category/list'
+      },
+      {
+        id: 'categoryDetail',
+        title: 'Detail',
+        permissions: ['admin', 'editor'],
+        navLink: '/pages/category/detail'
+      },
+      {
+        id: 'categoryEdit',
+        title: 'Edit',
+        permissions: ['admin', 'editor'],
+        navLink: '/pages/category/edit'
+      }
+    ]
+  },
+  {
+    id: 'images',
+    title: 'Images',
+    icon: <Circle size={12} />,
+    children: [
+      {
+        id: 'imageUpload',
+        title: 'Upload',
+        permissions: ['admin', 'editor'],
+        navLink: '/pages/image/upload'
+      },
+      {
+        id: 'imageGallery',
+        title: 'Gallery',
+        permissions: ['admin', 'editor'],
+        navLink: '/pages/image/gallery'
+      },
+    ]
+  },
 // {
 //     id: 'pages',
 //     title: 'Pages',

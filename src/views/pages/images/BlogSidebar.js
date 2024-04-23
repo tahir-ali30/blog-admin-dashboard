@@ -19,7 +19,7 @@ const BlogSidebar = () => {
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    axios.get('/api/v1/blogs?sort=createdAt:-1')
+    axios.get('/api/v1/blogs')
       .then(res => res.data.data)
       .then(blogs => setData(blogs))
   }, [])

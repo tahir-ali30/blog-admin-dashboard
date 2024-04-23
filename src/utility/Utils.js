@@ -3,6 +3,9 @@ import { DefaultRoute } from '../router/routes'
 // ** Checks if an object is empty (returns boolean)
 export const isObjEmpty = obj => Object.keys(obj).length === 0
 
+// ** Capitalize the first letter of a word
+export const titleFormat = word => word[0].toUpperCase() + word.slice(1)
+
 // ** Returns K format from a number
 export const kFormatter = num => (num > 999 ? `${(num / 1000).toFixed(1)}k` : num)
 

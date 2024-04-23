@@ -27,61 +27,53 @@ import '@styles/base/pages/page-blog.scss'
 import { useParams } from 'react-router-dom'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
 import SpinnerComponent from '../../../../@core/components/spinner/Fallback-spinner'
-import { titleFormat } from '../../../../utility/Utils'
 
-const BlogEdit = () => {
+const CategoryEdit = () => {
 
-  const { id } = useParams();
+  const { name:catName } = useParams();
   let editorState;
 
   // ** States
   const [data, setData] = useState(null),
-    [title, setTitle] = useState(''),
-    [tags, setTags] = useState(''),
-    [status, setStatus] = useState(''),
-    [content, setContent] = useState(editorState),
-    [blogCategory, setBlogCategory] = useState([]),
+    [name, setName] = useState(''),
+    [meta_title, setMetaTitle] = useState(''),
+    [meta_description, setMetaDescription] = useState(''),
+    [description, setDescription] = useState(editorState),
     [featuredImg, setFeaturedImg] = useState(null),
     [imgPath, setImgPath] = useState('banner.jpg'),
     [isLoading, setIsLoading] = useState(true),
-    [isSubmitting, setIsSubmitting] = useState(false),
-    [categories, setCategories] = useState([]);
+    [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    axios.get('/api/v1/category').then(({ data: { data } }) =>
-      setCategories(prev => data.map(({ _id, name }) => ({ value: _id, label: titleFormat(name) }))));
-
-    axios.get(`/api/v1/blogs/${id}`)
+    axios.get(`/api/v1/category/${catName}`)
       .then(res => res.data.data)
-      .then(blog => {
-        setData(blog.author)
-        setTitle(blog.title)
-        setTags(blog.tags.join(','))
-        // setBlogCategory(categories.find(cat => cat.value === blog.category._id))
-        setBlogCategory(prev => ({value:blog.category._id, label: titleFormat(blog.category.name)}))
-        setFeaturedImg(blog.featured_img)
-        setStatus(blog.status)
-        const initialContent = blog.content
+      .then(category => {
+        // setData(blog.author)
+        setName(category.name)
+        setMetaTitle(category.meta_title)
+        // setBlogCategory(categories.find(cat => cat.value === category.category))
+        setFeaturedImg(category.category_img)
+        setMetaDescription(category.meta_description)
+        // const initialContent = category.content
 
-        const contentBlock = htmlToDraft(initialContent)
-        const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks)
-        editorState = EditorState.createWithContent(contentState)
-        setContent(editorState)
+        // const contentBlock = htmlToDraft(initialContent)
+        // const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks)
+        // editorState = EditorState.createWithContent(contentState)
+        setDescription(category.description)
         setIsLoading(false)
-      })
-    
+    })
     }, [])
 
-  // const categories = [
-  //   { value: 'Design', label: 'Design' },
-  //   { value: 'Technology', label: 'Technology' },
-  //   { value: 'Gadget', label: 'Gadget' },
-  //   { value: 'SEO', label: 'SEO' },
-  //   { value: 'Travel', label: 'Travel' },
-  //   { value: 'Lifestyle', label: 'Lifestyle' },
-  //   { value: 'Leadership', label: 'Leadership' },
-  //   { value: 'Food', label: 'Food' },
-  // ]
+  const categories = [
+    { value: 'Design', label: 'Design' },
+    { value: 'Technology', label: 'Technology' },
+    { value: 'Gadget', label: 'Gadget' },
+    { value: 'SEO', label: 'SEO' },
+    { value: 'Travel', label: 'Travel' },
+    { value: 'Lifestyle', label: 'Lifestyle' },
+    { value: 'Leadership', label: 'Leadership' },
+    { value: 'Food', label: 'Food' },
+  ]
 
   const onChange = e => {
     const file = e.target.files?.[0]
@@ -100,7 +92,7 @@ const BlogEdit = () => {
     const blogContent = draftToHtml(convertToRaw(content.getCurrentContent()))
 
     setIsSubmitting(true)
-    const { message } = (await axios.patch(`/api/v1/blogs/${id}`, { title, content: blogContent, featured_img: featuredImg, status, tags, category: blogCategory.value }, {
+    const { message } = (await axios.patch(`/api/v1/blogs/${id}`, { title, description: blogContent, featured_img: featuredImg, meta_description, meta_title, category: blogCategory.value }, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -116,7 +108,7 @@ const BlogEdit = () => {
 
   return (
     <div className='blog-edit-wrapper'>
-      <Breadcrumbs title='Blog Edit' data={[{ title: 'Pages' }, { title: 'Blog' }, { title: 'Edit' }]} />
+      <Breadcrumbs title='Category Edit' data={[{ title: 'Pages' }, { title: 'Category' }, { title: 'Edit' }]} />
       {isLoading !== true ? (
         <Row>
           <Col sm='12'>
@@ -135,11 +127,11 @@ const BlogEdit = () => {
                   <Row>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-title'>
-                        Title
+                        Name
                       </Label>
-                      <Input id='blog-edit-title' value={title} onChange={e => setTitle(e.target.value)} />
+                      <Input id='blog-edit-title' value={name} onChange={e => setName(e.target.value)} />
                     </Col>
-                    <Col md='6' className='mb-2'>
+                    {/* <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-category'>
                         Category
                       </Label>
@@ -148,39 +140,36 @@ const BlogEdit = () => {
                         isClearable={false}
                         theme={selectThemeColors}
                         value={blogCategory}
-                        // isMulti
+                        isMulti
                         name='colors'
                         options={categories}
                         className='react-select'
                         classNamePrefix='select'
                         onChange={data => setBlogCategory(data)}
                       />
-                    </Col>
+                    </Col> */}
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-slug'>
-                        Tags
+                        Meta Title
                       </Label>
-                      <Input id='blog-edit-slug' value={tags} onChange={e => setTags(e.target.value)} />
+                      <Input id='blog-edit-slug' value={meta_title} onChange={e => setMetaTitle(e.target.value)} />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-status'>
-                        Status
+                        Meta Description
                       </Label>
                       <Input
-                        type='select'
+                        type='text'
                         id='blog-edit-status'
-                        value={status}
-                        onChange={e => setStatus(e.target.value)}
+                        value={meta_description}
+                        onChange={e => setMetaDescription(e.target.value)}
                       >
-                        <option value=''>Select Status</option>
-                        <option value='Published'>Published</option>
-                        <option value='Pending'>Pending</option>
-                        <option value='Draft'>Draft</option>
                       </Input>
                     </Col>
                     <Col sm='12' className='mb-2'>
-                      <Label className='form-label'>Content</Label>
-                      <Editor editorState={content} onEditorStateChange={data => setContent(data)} />
+                      <Label className='form-label'>Description</Label>
+                      {/* <Editor editorState={content} onEditorStateChange={data => setDescription(data)} /> */}
+                      <Input type='textarea' value={description} onChange={(e) => setDescription(e.target.value)}></Input>
                     </Col>
                     <Col className='mb-2' sm='12'>
                       <div className='border rounded p-2'>
@@ -238,4 +227,4 @@ const BlogEdit = () => {
   )
 }
 
-export default BlogEdit
+export default CategoryEdit

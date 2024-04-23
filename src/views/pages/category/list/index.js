@@ -30,15 +30,16 @@ import {
 // ** Styles
 import '@styles/base/pages/page-blog.scss'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
+import { titleFormat } from '../../../../utility/Utils'
 
-const BlogList = () => {
+const CategoryList = () => {
   // ** States
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    axios.get('/api/v1/blogs')
+    axios.get('/api/v1/category')
       .then(res => res.data.data)
-      .then(blogs => setData(blogs))
+      .then(categories => setData(categories))
   }, [])
 
   const badgeColorsArr = {
@@ -50,37 +51,37 @@ const BlogList = () => {
   }
   const renderRenderList = () => {
     return data.map(item => {
-      const renderTags = () => {
-        return item.tags.map((tag, index) => {
-          return (
-            <a key={index} href='/' onClick={e => e.preventDefault()}>
-              <Badge
-                className={classnames({
-                  'me-50': index !== item.tags.length - 1
-                })}
-                color={badgeColorsArr[tag]}
-                pill
-              >
-                {tag}
-              </Badge>
-            </a>
-          )
-        })
-      }
+      // const renderTags = () => {
+      //   return item.tags.map((tag, index) => {
+      //     return (
+      //       <a key={index} href='/' onClick={e => e.preventDefault()}>
+      //         <Badge
+      //           className={classnames({
+      //             'me-50': index !== item.tags.length - 1
+      //           })}
+      //           color={badgeColorsArr[tag]}
+      //           pill
+      //         >
+      //           {tag}
+      //         </Badge>
+      //       </a>
+      //     )
+      //   })
+      // }
 
       return (
-        <Col key={item.title} md='6'>
+        <Col key={item.name} md='6'>
           <Card>
-            <Link to={`/pages/blog/detail/${item.slug}`}>
-              <CardImg className='img-fluid' src={item.featured_img} alt={item.title} top />
+            <Link to={`/pages/category/detail/${item.name}`}>
+              <CardImg className='img-fluid' src={item.category_img} alt={item.name} top />
             </Link>
             <CardBody>
               <CardTitle tag='h4'>
-                <Link className='blog-title-truncate text-body-heading' to={`/pages/blog/detail/${item.slug}`}>
-                  {item.title}
+                <Link className='blog-title-truncate text-body-heading' to={`/pages/category/detail/${item.name}`}>
+                  {titleFormat(item.name)}
                 </Link>
               </CardTitle>
-              <div className='d-flex'>
+              {/* <div className='d-flex'>
                 <Avatar className='me-50' img={item?.author?.avatar_img} imgHeight='24' imgWidth='24' />
                 <div>
                   <small className='text-muted me-25'>by</small>
@@ -92,18 +93,20 @@ const BlogList = () => {
                   <span className='text-muted ms-50 me-25'>|</span>
                   <small className='text-muted'>{item.blogPosted}</small>
                 </div>
-              </div>
-              <div className='my-1 py-25'>{renderTags()}</div>
-              <CardText className='blog-content-truncate'>{item.excerpt}</CardText>
-              <hr />
+              </div> */}
+              {/* <div className='my-1 py-25'>{renderTags()}</div> */}
+              <div className='mt-1 pt-25'>Description:</div>
+              <div className='my-1 py-20'>{item.description}</div>
+              {/* <CardText className='blog-content-truncate'>{item.excerpt}</CardText> */}
+              {/* <hr /> */}
               <div className='d-flex justify-content-between align-items-center'>
-                <Link to={`/pages/blog/detail/${item.id}`}>
+                {/* <Link to={`/pages/blog/detail/${item.id}`}>
                   <MessageSquare size={15} className='text-body me-50' />
                   <span className='text-body fw-bold'>{item.comment} Comments</span>
-                </Link>
-                <Link className='fw-bold' to={`/pages/blog/detail/${item.slug}`}>
+                </Link> */}
+                {/* <Link className='fw-bold' to={`/pages/blog/detail/${item._id}`}>
                   Read More
-                </Link>
+                </Link> */}
               </div>
             </CardBody>
           </Card>
@@ -114,7 +117,7 @@ const BlogList = () => {
 
   return (
     <Fragment>
-      <Breadcrumbs title='Blog List' data={[{ title: 'Pages' }, { title: 'Blog' }, { title: 'List' }]} />
+      <Breadcrumbs title='Category List' data={[{ title: 'Pages' }, { title: 'Category' }, { title: 'List' }]} />
       <div className='blog-wrapper'>
         <div className='content-detached content-left'>
           <div className='content-body'>
@@ -178,4 +181,4 @@ const BlogList = () => {
   )
 }
 
-export default BlogList
+export default CategoryList

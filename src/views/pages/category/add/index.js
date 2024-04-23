@@ -8,6 +8,7 @@ import htmlToDraft from 'html-to-draftjs'
 import draftToHtml from 'draftjs-to-html'
 import { Editor } from 'react-draft-wysiwyg'
 import { EditorState, ContentState, convertToRaw } from 'draft-js'
+// import useJwt from '@src/auth/jwt/useJwt'
 
 // ** Custom Components
 import Avatar from '@components/avatar'
@@ -25,9 +26,8 @@ import '@styles/base/plugins/forms/form-quill-editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
 import { useSelector } from 'react-redux'
-import { titleFormat } from '../../../../utility/Utils'
 
-const BlogAdd = () => {
+const CategoryAdd = () => {
   const token = useSelector(state => state.auth.accessToken)
   const initialContent = ``
 
@@ -37,33 +37,24 @@ const BlogAdd = () => {
 
   // ** States
   const [data, setData] = useState(null),
-    [title, setTitle] = useState(''),
-    [tags, setTags] = useState(''),
-    [status, setStatus] = useState(''),
-    [content, setContent] = useState(editorState),
-    [blogCategory, setBlogCategory] = useState([]),
+    [name, setName] = useState(''),
+    [meta_title, setMetaTitle] = useState(''),
+    [meta_description, setMetaDescription] = useState(''),
+    [description, setDescription] = useState(''),
     [featuredImg, setFeaturedImg] = useState(null),
     [imgPath, setImgPath] = useState('banner.jpg'),
-    [isSubmitting, setIsSubmitting] = useState(false),
-    [categories, setCategories] = useState([])
+    [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    axios.get('/api/v1/category').then(res => {
-      const categories = res.data.data;
-      const formatCategories = categories.map(category => ({ value: category._id, label: titleFormat(category.name) }))
-      setCategories(formatCategories);
-      });
-  }, []);
-  // const categories = [
-  //   { value: 'Design', label: 'Design' },
-  //   { value: 'Technology', label: 'Technology' },
-  //   { value: 'Gadget', label: 'Gadget' },
-  //   { value: 'SEO', label: 'SEO' },
-  //   { value: 'Travel', label: 'Travel' },
-  //   { value: 'Lifestyle', label: 'Lifestyle' },
-  //   { value: 'Leadership', label: 'Leadership' },
-  //   { value: 'Food', label: 'Food' },
-  // ]
+  const categories = [
+    { value: 'Design', label: 'Design' },
+    { value: 'Technology', label: 'Technology' },
+    { value: 'Gadget', label: 'Gadget' },
+    { value: 'SEO', label: 'SEO' },
+    { value: 'Travel', label: 'Travel' },
+    { value: 'Lifestyle', label: 'Lifestyle' },
+    { value: 'Leadership', label: 'Leadership' },
+    { value: 'Food', label: 'Food' },
+  ]
 
   const onChange = e => {
       const file = e.target.files?.[0]
@@ -78,10 +69,10 @@ const BlogAdd = () => {
 
     async function handleSubmit(e){
       e.preventDefault()
-      const blogContent = draftToHtml(convertToRaw(content.getCurrentContent()))
+      // const categoryDesc = draftToHtml(convertToRaw(description.getCurrentContent()))
 
       // setIsSubmitting(true)
-      const { message } = (await axios.post('/api/v1/blogs', { title, content: blogContent, featured_img: featuredImg, status, tags, category: blogCategory.value }, {
+      const { message } = (await axios.post('/api/v1/category', { name, description, category_img: featuredImg, meta_description, meta_title }, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
@@ -93,7 +84,7 @@ const BlogAdd = () => {
 
   return (
     <div className='blog-edit-wrapper'>
-      <Breadcrumbs title='Blog Add' data={[{ title: 'Pages' }, { title: 'Blog' }, { title: 'Add' }]} />
+      <Breadcrumbs title='Category Add' data={[{ title: 'Pages' }, { title: 'Category' }, { title: 'Add' }]} />
         <Row>
           <Col sm='12'>
             <Card>
@@ -113,9 +104,9 @@ const BlogAdd = () => {
                       <Label className='form-label' for='blog-edit-title'>
                         Title
                       </Label>
-                      <Input id='blog-edit-title' value={title} onChange={e => setTitle(e.target.value)} />
+                      <Input id='blog-edit-title' value={name} onChange={e => setName(e.target.value)} />
                     </Col>
-                    <Col md='6' className='mb-2'>
+                    {/* <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-category'>
                         Category
                       </Label>
@@ -124,48 +115,45 @@ const BlogAdd = () => {
                         isClearable={false}
                         theme={selectThemeColors}
                         value={blogCategory}
-                        // isMulti
+                        isMulti
                         name='colors'
                         options={categories}
                         className='react-select'
                         classNamePrefix='select'
                         onChange={data => setBlogCategory(data)}
                       />
-                    </Col>
+                    </Col> */}
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-slug'>
-                        Tags
+                        Meta Title
                       </Label>
-                      <Input id='blog-edit-slug' value={tags} onChange={e => setTags(e.target.value)} />
+                      <Input id='blog-edit-slug' value={meta_title} onChange={e => setMetaTitle(e.target.value)} />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-status'>
-                        Status
+                        Meta Description
                       </Label>
                       <Input
-                        type='select'
+                        type='text'
                         id='blog-edit-status'
-                        value={status}
-                        onChange={e => setStatus(e.target.value)}
+                        value={meta_description}
+                        onChange={e => setMetaDescription(e.target.value)}
                       >
-                        <option value=''>Select Status...</option>
-                        <option value='Published'>Published</option>
-                        <option value='Pending'>Pending</option>
-                        <option value='Draft'>Draft</option>
                       </Input>
                     </Col>
                     <Col sm='12' className='mb-2'>
-                      <Label className='form-label'>Content</Label>
-                                      <Editor editorState={content} onEditorStateChange={data => {setContent(data)}} />
+                      <Label className='form-label'>Description</Label>
+                    {/* <Editor editorState={description} onEditorStateChange={data => {setContent(data)}} /> */}
+                    <Input type='textarea' value={description} onChange={(e) => setDescription(e.target.value)}></Input>
                     </Col>
                     <Col className='mb-2' sm='12'>
                       <div className='border rounded p-2'>
-                        <h4 className='mb-1'>Featured Image</h4>
+                        <h4 className='mb-1'>Category Image</h4>
                         <div className='d-flex flex-column flex-md-row'>
                           <img
                             className='rounded me-2 mb-1 mb-md-0'
                             src={featuredImg ? URL.createObjectURL(featuredImg) : ''}
-                            alt='featured img'
+                            alt='Category Image'
                             width='170'
                             height='110'
                           />
@@ -194,7 +182,7 @@ const BlogAdd = () => {
                     </Col>
                     <Col className='mt-50'>
                       <Button color='primary' className='me-1' disabled={isSubmitting}>
-                        {isSubmitting ? 'Uploading Blog' : 'Add Blog'}
+                        {isSubmitting ? 'Uploading Category' : 'Add Category'}
                       </Button>
                       <Button color='secondary' outline>
                         Cancel
@@ -210,4 +198,4 @@ const BlogAdd = () => {
   )
 }
 
-export default BlogAdd
+export default CategoryAdd

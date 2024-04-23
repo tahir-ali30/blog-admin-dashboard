@@ -1,5 +1,11 @@
 import { lazy } from 'react'
 import { Navigate } from 'react-router-dom'
+import CategoryAdd from '../../views/pages/category/add'
+import CategoryList from '../../views/pages/category/list'
+import CategoryDetails from '../../views/pages/category/details'
+import CategoryEdit from '../../views/pages/category/edit'
+import ImageUpload from '../../views/pages/images/upload'
+import ImageGallery from '../../views/pages/images/gallery'
 
 const Faq = lazy(() => import('../../views/pages/faq'))
 const ApiKey = lazy(() => import('../../views/pages/api-key'))
@@ -80,6 +86,38 @@ const PagesRoutes = [
   {
     path: '/pages/blog/edit',
     element: <Navigate to='/pages/blog/edit/6621074331d83d1c212fb36b' />
+  },
+  {
+    path: '/pages/category/add',
+    element: <CategoryAdd />
+  },
+  {
+    path: '/pages/category/list',
+    element: <CategoryList />
+  },
+  {
+    path: '/pages/category/detail/:name',
+    element: <CategoryDetails />
+  },
+  {
+    path: '/pages/category/detail',
+    element: <Navigate to='/pages/category/detail/6623a4f2ca56b9cee90a792f' />
+  },
+  {
+    path: '/pages/category/edit/:name',
+    element: <CategoryEdit />
+  },
+  {
+    path: '/pages/category/edit',
+    element: <Navigate to='/pages/category/edit/6623a4f2ca56b9cee90a792f' />
+  },
+  {
+    path: '/pages/image/upload',
+    element: <ImageUpload />
+  },
+  {
+    path: '/pages/image/gallery/',
+    element: <ImageGallery />
   },
   {
     path: '/pages/pricing',

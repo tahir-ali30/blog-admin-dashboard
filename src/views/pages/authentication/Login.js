@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 // ** Custom Hooks
 import { useSkin } from '@hooks/useSkin'
-import useJwt from '@src/auth/jwt/useJwt'
+// import useJwt from '@src/auth/jwt/useJwt'
 
 // ** Third Party Components
 import toast from 'react-hot-toast'
@@ -115,15 +115,15 @@ const Login = () => {
   // }
 
   async function onSubmit({loginEmail, password}) {
-    const { data: { user } } = (await axios.post('http://localhost:3005/api/v1/auth/login', { email: loginEmail, password })).data;
-    dispatch(handleLogin(user))
-    ability.update([
+    const { data: { user, token } } = (await axios.post('http://localhost:3005/api/v1/auth/login', { email: loginEmail, password })).data;
+    user.ability = [
       {
         action: 'manage',
         subject: 'all'
       }
     ]
-    )
+    dispatch(handleLogin({ user, token }));
+    ability.update(user.ability)
     navigate('/pages/blog/list')
     toast(t => (
       <ToastContent t={t} role={user.role || 'admin'} name={user.fullName || user.userName || 'John Doe'} />
