@@ -59,7 +59,6 @@ const CategoryDetails = () => {
 
   useEffect(() => {
     axios.get(`/api/v1/category/${name}`).then(res => {
-      console.log(res.data)
       setData(res.data.data)
     });
   }, []);

@@ -25,70 +25,38 @@ import '@styles/base/plugins/forms/form-quill-editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
 import { useSelector } from 'react-redux'
-import { titleFormat } from '../../../../utility/Utils'
+import { asyncHandler, titleFormat } from '../../../../utility/Utils'
+import { Controller, useForm } from 'react-hook-form'
 
 const BlogAdd = () => {
-  const token = useSelector(state => state.auth.accessToken)
-  const initialContent = ``
-
-  // const contentBlock = htmlToDraft(initialContent)
-  // const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks)
   const editorState = EditorState.createEmpty()
 
   // ** States
   const [data, setData] = useState(null),
-    [title, setTitle] = useState(''),
-    [tags, setTags] = useState(''),
-    [status, setStatus] = useState(''),
-    [content, setContent] = useState(editorState),
-    [blogCategory, setBlogCategory] = useState([]),
     [featuredImg, setFeaturedImg] = useState(null),
     [imgPath, setImgPath] = useState('banner.jpg'),
-    [isSubmitting, setIsSubmitting] = useState(false),
     [categories, setCategories] = useState([])
+  
+  const { control, handleSubmit, formState: { isSubmitting } } = useForm();
 
   useEffect(() => {
-    axios.get('/api/v1/category').then(res => {
-      const categories = res.data.data;
+    asyncHandler(axios.get)('/api/v1/category')
+      .then(res => {
+      const categories = res.data;
       const formatCategories = categories.map(category => ({ value: category._id, label: titleFormat(category.name) }))
       setCategories(formatCategories);
       });
   }, []);
-  // const categories = [
-  //   { value: 'Design', label: 'Design' },
-  //   { value: 'Technology', label: 'Technology' },
-  //   { value: 'Gadget', label: 'Gadget' },
-  //   { value: 'SEO', label: 'SEO' },
-  //   { value: 'Travel', label: 'Travel' },
-  //   { value: 'Lifestyle', label: 'Lifestyle' },
-  //   { value: 'Leadership', label: 'Leadership' },
-  //   { value: 'Food', label: 'Food' },
-  // ]
 
   const onChange = e => {
       const file = e.target.files?.[0]
       setFeaturedImg(file)
-      //   console.log(file);
-    // const reader = new FileReader(),
-    // setImgPath(files[0].name)
-    // reader.onload = function () {
-    // }
-    // reader.readAsDataURL(files[0])
   }
 
-    async function handleSubmit(e){
-      e.preventDefault()
-      const blogContent = draftToHtml(convertToRaw(content.getCurrentContent()))
-
-      // setIsSubmitting(true)
-      const { message } = (await axios.post('/api/v1/blogs', { title, content: blogContent, featured_img: featuredImg, status, tags, category: blogCategory.value }, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        }
-      })).data;
-      setIsSubmitting(false)
-      alert(message);
+  async function onSubmitHandler(data) {
+    const blogContent = draftToHtml(convertToRaw(data.content.getCurrentContent()))
+    const { message } = await asyncHandler(axios.postForm)('/api/v1/blogs', { ...data, content: blogContent, category: blogCategory.value });
+    alert(message)
     }
 
   return (
@@ -107,56 +75,81 @@ const BlogAdd = () => {
                     <CardText>{data?.createdTime}</CardText>
                   </div>
                 </div>
-                <Form className='mt-2' onSubmit={handleSubmit}>
+                <Form className='mt-2' onSubmit={handleSubmit(onSubmitHandler)}>
                   <Row>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-title'>
                         Title
-                      </Label>
-                      <Input id='blog-edit-title' value={title} onChange={e => setTitle(e.target.value)} />
+                    </Label>
+                    <Controller
+                      name="title"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-title' />                      
+                    )} />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-category'>
                         Category
                       </Label>
-                      <Select
-                        id='blog-edit-category'
-                        isClearable={false}
-                        theme={selectThemeColors}
-                        value={blogCategory}
-                        // isMulti
-                        name='colors'
-                        options={categories}
-                        className='react-select'
-                        classNamePrefix='select'
-                        onChange={data => setBlogCategory(data)}
+                      <Controller
+                      name="blogCategory"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          id='blog-edit-category'
+                          isClearable={false}
+                          theme={selectThemeColors}
+                          // isMulti
+                          name='colors'
+                          options={categories}
+                          className='react-select'
+                          classNamePrefix='select'
                       />
+                    )} />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-slug'>
                         Tags
-                      </Label>
-                      <Input id='blog-edit-slug' value={tags} onChange={e => setTags(e.target.value)} />
+                    </Label>
+                    <Controller
+                      name='tags'
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' />
+                      ) } />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-status'>
                         Status
                       </Label>
-                      <Input
-                        type='select'
-                        id='blog-edit-status'
-                        value={status}
-                        onChange={e => setStatus(e.target.value)}
-                      >
-                        <option value=''>Select Status...</option>
-                        <option value='Published'>Published</option>
-                        <option value='Pending'>Pending</option>
-                        <option value='Draft'>Draft</option>
+                      <Controller
+                      name='status'
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          type='select'
+                          id='blog-edit-status'
+                        >
+                          <option value=''>Select Status...</option>
+                          <option value='Published'>Published</option>
+                          <option value='Pending'>Pending</option>
+                          <option value='Draft'>Draft</option>
                       </Input>
-                    </Col>
+                      )} />
+                      </Col>
                     <Col sm='12' className='mb-2'>
-                      <Label className='form-label'>Content</Label>
-                                      <Editor editorState={content} onEditorStateChange={data => {setContent(data)}} />
+                    <Label className='form-label'>Content</Label>
+                    <Controller
+                      name='content'
+                      control={control}
+                      defaultValue={editorState}
+                      render={({ field: { onChange, value } }) => (
+                        <Editor editorState={value} onEditorStateChange={onChange} />
+                      )}
+                    />
                     </Col>
                     <Col className='mb-2' sm='12'>
                       <div className='border rounded p-2'>

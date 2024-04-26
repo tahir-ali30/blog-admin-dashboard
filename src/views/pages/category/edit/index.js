@@ -3,11 +3,6 @@ import { useState, useEffect } from 'react'
 
 // ** Third Party Components
 import axios from 'axios'
-import Select from 'react-select'
-import draftToHtml from 'draftjs-to-html'
-import htmlToDraft from 'html-to-draftjs'
-import { Editor } from 'react-draft-wysiwyg'
-import { EditorState, ContentState, convertToRaw } from 'draft-js'
 
 // ** Custom Components
 import Avatar from '@components/avatar'
@@ -27,82 +22,44 @@ import '@styles/base/pages/page-blog.scss'
 import { useParams } from 'react-router-dom'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
 import SpinnerComponent from '../../../../@core/components/spinner/Fallback-spinner'
+import { Controller, useForm } from 'react-hook-form'
+import { asyncHandler } from '../../../../utility/Utils'
 
 const CategoryEdit = () => {
 
-  const { name:catName } = useParams();
-  let editorState;
+  const { name:categoryName } = useParams();
 
   // ** States
   const [data, setData] = useState(null),
-    [name, setName] = useState(''),
-    [meta_title, setMetaTitle] = useState(''),
-    [meta_description, setMetaDescription] = useState(''),
-    [description, setDescription] = useState(editorState),
     [featuredImg, setFeaturedImg] = useState(null),
     [imgPath, setImgPath] = useState('banner.jpg'),
-    [isLoading, setIsLoading] = useState(true),
-    [isSubmitting, setIsSubmitting] = useState(false)
+    [isLoading, setIsLoading] = useState(true)
+
+  const { handleSubmit, control, formState: { isSubmitting }, reset } = useForm();
 
   useEffect(() => {
-    axios.get(`/api/v1/category/${catName}`)
+    axios.get(`/api/v1/category/${categoryName}`)
       .then(res => res.data.data)
       .then(category => {
-        // setData(blog.author)
-        setName(category.name)
-        setMetaTitle(category.meta_title)
-        // setBlogCategory(categories.find(cat => cat.value === category.category))
+        reset(category)
         setFeaturedImg(category.category_img)
-        setMetaDescription(category.meta_description)
-        // const initialContent = category.content
-
-        // const contentBlock = htmlToDraft(initialContent)
-        // const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks)
-        // editorState = EditorState.createWithContent(contentState)
-        setDescription(category.description)
         setIsLoading(false)
     })
     }, [])
 
-  const categories = [
-    { value: 'Design', label: 'Design' },
-    { value: 'Technology', label: 'Technology' },
-    { value: 'Gadget', label: 'Gadget' },
-    { value: 'SEO', label: 'SEO' },
-    { value: 'Travel', label: 'Travel' },
-    { value: 'Lifestyle', label: 'Lifestyle' },
-    { value: 'Leadership', label: 'Leadership' },
-    { value: 'Food', label: 'Food' },
-  ]
-
   const onChange = e => {
     const file = e.target.files?.[0]
     setFeaturedImg(file)
-  // const reader = new FileReader(),
-    //   files = e.target.files
-    // setImgPath(files[0].name)
-    // reader.onload = function () {
-    //   setFeaturedImg(reader.result)
-    // }
-    // reader.readAsDataURL(files[0])
+    setImgPath(file.name);
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const blogContent = draftToHtml(convertToRaw(content.getCurrentContent()))
-
-    setIsSubmitting(true)
-    const { message } = (await axios.patch(`/api/v1/blogs/${id}`, { title, description: blogContent, featured_img: featuredImg, meta_description, meta_title, category: blogCategory.value }, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })).data;
-    setIsSubmitting(false)
+  async function onSubmitHandler(data) {
+    const { message } = await asyncHandler(axios.patchForm)(`/api/v1/category/${categoryName}`, { ...data, category_img: featuredImg });
     alert(message);
   }
 
   async function handleDelete() {
-    const {message} = (await axios.delete(`/api/v1/blogs/${id}`)).data
+    const { message } = await asyncHandler(axios.delete)(`/api/v1/category/${categoryName}`);
     alert(message);
   }
 
@@ -123,53 +80,49 @@ const CategoryEdit = () => {
                     <CardText>{data?.createdAt}</CardText>
                   </div>
                 </div>
-                <Form className='mt-2' onSubmit={handleSubmit}>
+                <Form className='mt-2' onSubmit={handleSubmit(onSubmitHandler)}>
                   <Row>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-title'>
                         Name
                       </Label>
-                      <Input id='blog-edit-title' value={name} onChange={e => setName(e.target.value)} />
+                      <Controller
+                      control={control}
+                      name="name"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-title' />
+                      )} />
                     </Col>
-                    {/* <Col md='6' className='mb-2'>
-                      <Label className='form-label' for='blog-edit-category'>
-                        Category
-                      </Label>
-                      <Select
-                        id='blog-edit-category'
-                        isClearable={false}
-                        theme={selectThemeColors}
-                        value={blogCategory}
-                        isMulti
-                        name='colors'
-                        options={categories}
-                        className='react-select'
-                        classNamePrefix='select'
-                        onChange={data => setBlogCategory(data)}
-                      />
-                    </Col> */}
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-slug'>
                         Meta Title
                       </Label>
-                      <Input id='blog-edit-slug' value={meta_title} onChange={e => setMetaTitle(e.target.value)} />
+                      <Controller
+                      control={control}
+                      name="meta_title"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' />                      
+                    )} />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-status'>
                         Meta Description
                       </Label>
-                      <Input
-                        type='text'
-                        id='blog-edit-status'
-                        value={meta_description}
-                        onChange={e => setMetaDescription(e.target.value)}
-                      >
-                      </Input>
+                      <Controller
+                      control={control}
+                      name="meta_description"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' />                      
+                    )} />
                     </Col>
                     <Col sm='12' className='mb-2'>
                       <Label className='form-label'>Description</Label>
-                      {/* <Editor editorState={content} onEditorStateChange={data => setDescription(data)} /> */}
-                      <Input type='textarea' value={description} onChange={(e) => setDescription(e.target.value)}></Input>
+                      <Controller
+                      control={control}
+                      name="description"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' type='textarea' />
+                    )} />
                     </Col>
                     <Col className='mb-2' sm='12'>
                       <div className='border rounded p-2'>

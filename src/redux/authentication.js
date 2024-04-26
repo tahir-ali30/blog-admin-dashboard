@@ -1,5 +1,6 @@
 // ** Redux Imports
 import { createSlice } from '@reduxjs/toolkit'
+import axios from 'axios'
 
 // ** UseJWT import to get config
 // import useJwt from '@src/auth/jwt/useJwt'
@@ -9,6 +10,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialUser = () => {
   const userData = window.localStorage.getItem('userData')
   const accessToken = window.localStorage.getItem('accessToken')
+  // axios.defaults.headers.common['Authorization'] =  `Bearer ${JSON.parse(accessToken)}`
   //** Parse stored json or if none return initialValue
   return userData && accessToken ? {
     userData: JSON.parse(userData),
@@ -29,6 +31,7 @@ export const authSlice = createSlice({
       // localStorage.setItem(config.storageTokenKeyName, JSON.stringify(action.payload.accessToken))
       localStorage.setItem('accessToken', JSON.stringify(action.payload.token))
       // localStorage.setItem(config.storageRefreshTokenKeyName, JSON.stringify(action.payload.refreshToken))
+      // axios.defaults.headers.common['Authorization'] =  `Bearer ${action.payload.token}`
     },
     handleLogout: state => {
       state.userData = {}

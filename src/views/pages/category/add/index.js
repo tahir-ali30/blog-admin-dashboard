@@ -3,12 +3,6 @@ import { useState, useEffect } from 'react'
 
 // ** Third Party Components
 import axios from 'axios'
-import Select from 'react-select'
-import htmlToDraft from 'html-to-draftjs'
-import draftToHtml from 'draftjs-to-html'
-import { Editor } from 'react-draft-wysiwyg'
-import { EditorState, ContentState, convertToRaw } from 'draft-js'
-// import useJwt from '@src/auth/jwt/useJwt'
 
 // ** Custom Components
 import Avatar from '@components/avatar'
@@ -25,60 +19,25 @@ import '@styles/react/libs/editor/editor.scss'
 import '@styles/base/plugins/forms/form-quill-editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
-import { useSelector } from 'react-redux'
+import { asyncHandler } from '../../../../utility/Utils'
+import { Controller, useForm } from 'react-hook-form'
 
 const CategoryAdd = () => {
-  const token = useSelector(state => state.auth.accessToken)
-  const initialContent = ``
-
-  // const contentBlock = htmlToDraft(initialContent)
-  // const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks)
-  const editorState = EditorState.createEmpty()
-
   // ** States
   const [data, setData] = useState(null),
-    [name, setName] = useState(''),
-    [meta_title, setMetaTitle] = useState(''),
-    [meta_description, setMetaDescription] = useState(''),
-    [description, setDescription] = useState(''),
     [featuredImg, setFeaturedImg] = useState(null),
-    [imgPath, setImgPath] = useState('banner.jpg'),
-    [isSubmitting, setIsSubmitting] = useState(false)
-
-  const categories = [
-    { value: 'Design', label: 'Design' },
-    { value: 'Technology', label: 'Technology' },
-    { value: 'Gadget', label: 'Gadget' },
-    { value: 'SEO', label: 'SEO' },
-    { value: 'Travel', label: 'Travel' },
-    { value: 'Lifestyle', label: 'Lifestyle' },
-    { value: 'Leadership', label: 'Leadership' },
-    { value: 'Food', label: 'Food' },
-  ]
+    [imgPath, setImgPath] = useState('')
+  
+  const { handleSubmit, control, formState: { isSubmitting } } = useForm();
 
   const onChange = e => {
       const file = e.target.files?.[0]
-      setFeaturedImg(file)
-      //   console.log(file);
-    // const reader = new FileReader(),
-    // setImgPath(files[0].name)
-    // reader.onload = function () {
-    // }
-    // reader.readAsDataURL(files[0])
+    setFeaturedImg(file)
+    setImgPath(file.name);
   }
 
-    async function handleSubmit(e){
-      e.preventDefault()
-      // const categoryDesc = draftToHtml(convertToRaw(description.getCurrentContent()))
-
-      // setIsSubmitting(true)
-      const { message } = (await axios.post('/api/v1/category', { name, description, category_img: featuredImg, meta_description, meta_title }, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        }
-      })).data;
-      setIsSubmitting(false)
+  async function onSubmitHandler(data) {
+    const { message } = await asyncHandler(axios.postForm)('/api/v1/category', { ...data, category_img: featuredImg });
       alert(message);
     }
 
@@ -98,53 +57,49 @@ const CategoryAdd = () => {
                     <CardText>{data?.createdTime}</CardText>
                   </div>
                 </div>
-                <Form className='mt-2' onSubmit={handleSubmit}>
+                <Form className='mt-2' onSubmit={handleSubmit(onSubmitHandler)}>
                   <Row>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-title'>
-                        Title
-                      </Label>
-                      <Input id='blog-edit-title' value={name} onChange={e => setName(e.target.value)} />
+                        Name
+                    </Label>
+                    <Controller
+                      control={control}
+                      name="name"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-title' />
+                      )} />
                     </Col>
-                    {/* <Col md='6' className='mb-2'>
-                      <Label className='form-label' for='blog-edit-category'>
-                        Category
-                      </Label>
-                      <Select
-                        id='blog-edit-category'
-                        isClearable={false}
-                        theme={selectThemeColors}
-                        value={blogCategory}
-                        isMulti
-                        name='colors'
-                        options={categories}
-                        className='react-select'
-                        classNamePrefix='select'
-                        onChange={data => setBlogCategory(data)}
-                      />
-                    </Col> */}
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-slug'>
                         Meta Title
-                      </Label>
-                      <Input id='blog-edit-slug' value={meta_title} onChange={e => setMetaTitle(e.target.value)} />
+                    </Label>
+                    <Controller
+                      control={control}
+                      name="meta_title"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' />                      
+                    )} />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-status'>
                         Meta Description
                       </Label>
-                      <Input
-                        type='text'
-                        id='blog-edit-status'
-                        value={meta_description}
-                        onChange={e => setMetaDescription(e.target.value)}
-                      >
-                      </Input>
+                      <Controller
+                      control={control}
+                      name="meta_description"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' />                      
+                    )} />
                     </Col>
                     <Col sm='12' className='mb-2'>
                       <Label className='form-label'>Description</Label>
-                    {/* <Editor editorState={description} onEditorStateChange={data => {setContent(data)}} /> */}
-                    <Input type='textarea' value={description} onChange={(e) => setDescription(e.target.value)}></Input>
+                      <Controller
+                      control={control}
+                      name="description"
+                      render={({ field }) => (
+                        <Input {...field} id='blog-edit-slug' type='textarea' />
+                    )} />
                     </Col>
                     <Col className='mb-2' sm='12'>
                       <div className='border rounded p-2'>

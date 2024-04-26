@@ -82,3 +82,14 @@ export const selectThemeColors = theme => ({
     neutral30: '#ededed' // for input hover border-color
   }
 })
+
+
+// ** axios request handler
+export const asyncHandler = (fn) => async (url, dataToSend) => {
+  try {
+    const { data } = await fn(url, dataToSend);
+    return data;
+  } catch (error) {
+    alert(error.response.data.message);
+  }
+}

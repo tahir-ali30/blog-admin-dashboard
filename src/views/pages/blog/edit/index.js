@@ -27,7 +27,8 @@ import '@styles/base/pages/page-blog.scss'
 import { useParams } from 'react-router-dom'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
 import SpinnerComponent from '../../../../@core/components/spinner/Fallback-spinner'
-import { titleFormat } from '../../../../utility/Utils'
+import { asyncHandler, titleFormat } from '../../../../utility/Utils'
+import { Controller, useForm } from 'react-hook-form'
 
 const BlogEdit = () => {
 
@@ -36,81 +37,55 @@ const BlogEdit = () => {
 
   // ** States
   const [data, setData] = useState(null),
-    [title, setTitle] = useState(''),
-    [tags, setTags] = useState(''),
-    [status, setStatus] = useState(''),
-    [content, setContent] = useState(editorState),
-    [blogCategory, setBlogCategory] = useState([]),
-    [featuredImg, setFeaturedImg] = useState(null),
+    // [title, setTitle] = useState(''),
+    // [tags, setTags] = useState(''),
+    // [status, setStatus] = useState(''),
+    // [content, setContent] = useState(editorState),
+    // [blogCategory, setBlogCategory] = useState([]),
+    [featured_img, setFeaturedImg] = useState(null),
     [imgPath, setImgPath] = useState('banner.jpg'),
     [isLoading, setIsLoading] = useState(true),
-    [isSubmitting, setIsSubmitting] = useState(false),
+    // [isSubmitting, setIsSubmitting] = useState(false),
     [categories, setCategories] = useState([]);
 
-  useEffect(() => {
-    axios.get('/api/v1/category').then(({ data: { data } }) =>
+  const { control, handleSubmit, formState: { isSubmitting }, reset } = useForm();
+
+    useEffect(() => {
+    asyncHandler(axios.get)('/api/v1/category').then(({ data }) =>
       setCategories(prev => data.map(({ _id, name }) => ({ value: _id, label: titleFormat(name) }))));
 
-    axios.get(`/api/v1/blogs/${id}`)
-      .then(res => res.data.data)
+    asyncHandler(axios.get)(`/api/v1/blogs/${id}`)
+      .then(res => res.data)
       .then(blog => {
+        blog.tags = blog.tags.join(',');
+        blog.blogCategory = { value: blog.category._id, label: titleFormat(blog.category.name) };
         setData(blog.author)
-        setTitle(blog.title)
-        setTags(blog.tags.join(','))
-        // setBlogCategory(categories.find(cat => cat.value === blog.category._id))
-        setBlogCategory(prev => ({value:blog.category._id, label: titleFormat(blog.category.name)}))
         setFeaturedImg(blog.featured_img)
-        setStatus(blog.status)
-        const initialContent = blog.content
 
-        const contentBlock = htmlToDraft(initialContent)
+        const contentBlock = htmlToDraft(blog.content)
         const contentState = ContentState.createFromBlockArray(contentBlock.contentBlocks)
         editorState = EditorState.createWithContent(contentState)
-        setContent(editorState)
+        blog.content = editorState
+        reset(blog);
         setIsLoading(false)
       })
     
     }, [])
 
-  // const categories = [
-  //   { value: 'Design', label: 'Design' },
-  //   { value: 'Technology', label: 'Technology' },
-  //   { value: 'Gadget', label: 'Gadget' },
-  //   { value: 'SEO', label: 'SEO' },
-  //   { value: 'Travel', label: 'Travel' },
-  //   { value: 'Lifestyle', label: 'Lifestyle' },
-  //   { value: 'Leadership', label: 'Leadership' },
-  //   { value: 'Food', label: 'Food' },
-  // ]
-
   const onChange = e => {
     const file = e.target.files?.[0]
     setFeaturedImg(file)
-  // const reader = new FileReader(),
-    //   files = e.target.files
-    // setImgPath(files[0].name)
-    // reader.onload = function () {
-    //   setFeaturedImg(reader.result)
-    // }
-    // reader.readAsDataURL(files[0])
+    setImgPath(file.name)
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const blogContent = draftToHtml(convertToRaw(content.getCurrentContent()))
-
-    setIsSubmitting(true)
-    const { message } = (await axios.patch(`/api/v1/blogs/${id}`, { title, content: blogContent, featured_img: featuredImg, status, tags, category: blogCategory.value }, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })).data;
-    setIsSubmitting(false)
+  async function onSubmitHandler(data) {
+    const content = draftToHtml(convertToRaw(data.content.getCurrentContent()))
+    const { message } = await asyncHandler(axios.patchForm)(`/api/v1/blogs/${id}`, { ...data, content, featured_img, category: data.blogCategory.value });
     alert(message);
   }
 
   async function handleDelete() {
-    const {message} = (await axios.delete(`/api/v1/blogs/${id}`)).data
+    const { message } = await asyncHandler(axios.delete)(`/api/v1/blogs/${id}`);
     alert(message);
   }
 
@@ -131,64 +106,92 @@ const BlogEdit = () => {
                     <CardText>{data?.createdAt}</CardText>
                   </div>
                 </div>
-                <Form className='mt-2' onSubmit={handleSubmit}>
+                <Form className='mt-2' onSubmit={handleSubmit(onSubmitHandler)}>
                   <Row>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-title'>
                         Title
                       </Label>
-                      <Input id='blog-edit-title' value={title} onChange={e => setTitle(e.target.value)} />
+                      <Controller
+                        name='title'
+                        control={control}
+                        render={({ field }) => (
+                          <Input {...field} id='blog-edit-title'/>
+                        )}
+                      />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-category'>
                         Category
                       </Label>
-                      <Select
-                        id='blog-edit-category'
-                        isClearable={false}
-                        theme={selectThemeColors}
-                        value={blogCategory}
-                        // isMulti
-                        name='colors'
-                        options={categories}
-                        className='react-select'
-                        classNamePrefix='select'
-                        onChange={data => setBlogCategory(data)}
+                      <Controller
+                        name='blogCategory'
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            {...field}
+                          id='blog-edit-category'
+                          isClearable={false}
+                          theme={selectThemeColors}
+                          // isMulti
+                          name='colors'
+                          options={categories}
+                          className='react-select'
+                          classNamePrefix='select'
+                        />
+                        )}
                       />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-slug'>
                         Tags
                       </Label>
-                      <Input id='blog-edit-slug' value={tags} onChange={e => setTags(e.target.value)} />
+                      <Controller
+                        name='tags'
+                        control={control}
+                        render={({ field }) => (
+                          <Input {...field} id='blog-edit-slug' />
+                        )}
+                      />
                     </Col>
                     <Col md='6' className='mb-2'>
                       <Label className='form-label' for='blog-edit-status'>
                         Status
                       </Label>
-                      <Input
-                        type='select'
-                        id='blog-edit-status'
-                        value={status}
-                        onChange={e => setStatus(e.target.value)}
-                      >
-                        <option value=''>Select Status</option>
-                        <option value='Published'>Published</option>
-                        <option value='Pending'>Pending</option>
-                        <option value='Draft'>Draft</option>
-                      </Input>
+                      <Controller
+                        name='status'
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                          type='select'
+                          id='blog-edit-status'
+                        >
+                          <option value=''>Select Status</option>
+                          <option value='Published'>Published</option>
+                          <option value='Pending'>Pending</option>
+                          <option value='Draft'>Draft</option>
+                        </Input>                        )} />
+
                     </Col>
                     <Col sm='12' className='mb-2'>
                       <Label className='form-label'>Content</Label>
-                      <Editor editorState={content} onEditorStateChange={data => setContent(data)} />
+                      <Controller
+                        name='content'
+                        control={control}
+                        defaultValue={editorState}
+                        render={({ field: { onChange, value } }) => (
+                          <Editor editorState={value} onEditorStateChange={onChange} />
+                        )}
+                      />
                     </Col>
                     <Col className='mb-2' sm='12'>
                       <div className='border rounded p-2'>
                         <h4 className='mb-1'>Featured Image</h4>
                         <div className='d-flex flex-column flex-md-row'>
-                          {featuredImg && <img
+                          {featured_img && <img
                             className='rounded me-2 mb-1 mb-md-0'
-                            src={typeof featuredImg == 'string' ? featuredImg : URL.createObjectURL(featuredImg)}
+                            src={typeof featured_img == 'string' ? featured_img : URL.createObjectURL(featured_img)}
                             alt='featured img'
                             width='170'
                             height='110'
