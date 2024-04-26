@@ -19,18 +19,18 @@ export default [
         permissions: ['admin', 'editor'],
         navLink: '/pages/blog/list'
       },
-      {
-        id: 'blogDetail',
-        title: 'Detail',
-        permissions: ['admin', 'editor'],
-        navLink: '/pages/blog/detail'
-      },
-      {
-        id: 'blogEdit',
-        title: 'Edit',
-        permissions: ['admin', 'editor'],
-        navLink: '/pages/blog/edit'
-      }
+      // {
+      //   id: 'blogDetail',
+      //   title: 'Detail',
+      //   permissions: ['admin', 'editor'],
+      //   navLink: '/pages/blog/detail'
+      // },
+      // {
+      //   id: 'blogEdit',
+      //   title: 'Edit',
+      //   permissions: ['admin', 'editor'],
+      //   navLink: '/pages/blog/edit'
+      // }
     ]
   },
   {
@@ -50,18 +50,18 @@ export default [
         permissions: ['admin', 'editor'],
         navLink: '/pages/category/list'
       },
-      {
-        id: 'categoryDetail',
-        title: 'Detail',
-        permissions: ['admin', 'editor'],
-        navLink: '/pages/category/detail'
-      },
-      {
-        id: 'categoryEdit',
-        title: 'Edit',
-        permissions: ['admin', 'editor'],
-        navLink: '/pages/category/edit'
-      }
+      // {
+      //   id: 'categoryDetail',
+      //   title: 'Detail',
+      //   permissions: ['admin', 'editor'],
+      //   navLink: '/pages/category/detail'
+      // },
+      // {
+      //   id: 'categoryEdit',
+      //   title: 'Edit',
+      //   permissions: ['admin', 'editor'],
+      //   navLink: '/pages/category/edit'
+      // }
     ]
   },
   {

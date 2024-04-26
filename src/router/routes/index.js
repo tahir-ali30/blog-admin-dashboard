@@ -2,12 +2,12 @@
 import { Fragment } from 'react'
 
 // ** Routes Imports
-import AppRoutes from './Apps'
-import FormRoutes from './Forms'
+// import AppRoutes from './Apps'
+// import FormRoutes from './Forms'
 import PagesRoutes from './Pages'
-import TablesRoutes from './Tables'
-import ChartsRoutes from './Charts'
-import DashboardRoutes from './Dashboards'
+// import TablesRoutes from './Tables'
+// import ChartsRoutes from './Charts'
+// import DashboardRoutes from './Dashboards'
 import UiElementRoutes from './UiElements'
 import ExtensionsRoutes from './Extensions'
 import PageLayoutsRoutes from './PageLayouts'
@@ -41,15 +41,15 @@ const DefaultRoute = '/dashboard/ecommerce'
 // ** Merge Routes
 const Routes = [
   ...AuthenticationRoutes,
-  ...DashboardRoutes,
-  ...AppRoutes,
+  // ...DashboardRoutes,
+  // ...AppRoutes,
   ...PagesRoutes,
   ...UiElementRoutes,
   ...ExtensionsRoutes,
   ...PageLayoutsRoutes,
-  ...FormRoutes,
-  ...TablesRoutes,
-  ...ChartsRoutes
+  // ...FormRoutes,
+  // ...TablesRoutes,
+  // ...ChartsRoutes
 ]
 
 const getRouteMeta = route => {
