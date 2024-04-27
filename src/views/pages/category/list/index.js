@@ -30,15 +30,15 @@ import {
 // ** Styles
 import '@styles/base/pages/page-blog.scss'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
-import { titleFormat } from '../../../../utility/Utils'
+import { asyncHandler, titleFormat } from '../../../../utility/Utils'
 
 const CategoryList = () => {
   // ** States
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    axios.get('/api/v1/category')
-      .then(res => res.data.data)
+    asyncHandler(axios.get)('/api/v1/category')
+      .then(res => res.data)
       .then(categories => setData(categories))
   }, [])
 

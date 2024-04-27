@@ -30,15 +30,15 @@ import {
 // ** Styles
 import '@styles/base/pages/page-blog.scss'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
-import { titleFormat } from '../../../../utility/Utils'
+import { asyncHandler, titleFormat } from '../../../../utility/Utils'
 
 const ImageGallery = () => {
   // ** States
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    axios.get('/api/v1/images')
-      .then(res => res.data.data)
+    asyncHandler(axios.get)('/api/v1/images')
+      .then(res => res.data)
       .then(images => setData(images))
   }, [])
 

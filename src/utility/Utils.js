@@ -90,6 +90,6 @@ export const asyncHandler = (fn) => async (url, dataToSend) => {
     const { data } = await fn(url, dataToSend);
     return data;
   } catch (error) {
-    alert(error.response.data.message);
+    alert(error.response.data.message || 'Server is not responding');
   }
 }

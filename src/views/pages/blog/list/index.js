@@ -30,14 +30,15 @@ import {
 // ** Styles
 import '@styles/base/pages/page-blog.scss'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
+import { asyncHandler } from '../../../../utility/Utils'
 
 const BlogList = () => {
   // ** States
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    axios.get('/api/v1/blogs')
-      .then(res => res.data.data)
+    asyncHandler(axios.get)('/api/v1/blogs')
+      .then(res => res.data)
       .then(blogs => setData(blogs))
   }, [])
 

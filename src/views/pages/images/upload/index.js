@@ -26,6 +26,7 @@ import '@styles/base/plugins/forms/form-quill-editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
 import { useSelector } from 'react-redux'
+import { asyncHandler } from '../../../../utility/Utils'
 
 const ImageUpload = () => {
   // ** States
@@ -36,24 +37,13 @@ const ImageUpload = () => {
   const onChange = e => {
       const file = e.target.files?.[0]
       setFeaturedImg(file)
-      //   console.log(file);
-    // const reader = new FileReader(),
-    // setImgPath(files[0].name)
-    // reader.onload = function () {
-    // }
-    // reader.readAsDataURL(files[0])
   }
 
     async function handleSubmit(e){
       e.preventDefault()
 
       setIsSubmitting(true)
-      const { message } = (await axios.post('/api/v1/images', { image: featuredImg }, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          // 'Authorization': `Bearer ${token}`
-        }
-      })).data;
+      const { message } = await asyncHandler(axios.postForm)('/api/v1/images', { image: featuredImg });
       setIsSubmitting(false)
       alert(message);
     }

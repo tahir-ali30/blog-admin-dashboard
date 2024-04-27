@@ -51,6 +51,7 @@ import '@styles/base/pages/page-blog.scss'
 import cmtImg from '@src/assets/images/portrait/small/avatar-s-6.jpg'
 import { Link, useParams } from 'react-router-dom'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
+import { asyncHandler } from '../../../../utility/Utils'
 
 const CategoryDetails = () => {
   // ** States
@@ -58,8 +59,9 @@ const CategoryDetails = () => {
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    axios.get(`/api/v1/category/${name}`).then(res => {
-      setData(res.data.data)
+    asyncHandler(axios.get)(`/api/v1/category/${name}`)
+      .then(res => {
+      setData(res.data)
     });
   }, []);
 
