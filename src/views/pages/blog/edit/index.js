@@ -24,7 +24,7 @@ import '@styles/react/libs/editor/editor.scss'
 import '@styles/base/plugins/forms/form-quill-editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
 import SpinnerComponent from '../../../../@core/components/spinner/Fallback-spinner'
 import { asyncHandler, titleFormat } from '../../../../utility/Utils'
@@ -174,6 +174,16 @@ const BlogEdit = () => {
                         </Input>                        )} />
 
                     </Col>
+                    <Col md='6' className={'mb-2'}>
+                    <Label className={'form-label'}>Featured Blog</Label>
+                    <Controller
+                      name='featured'
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type='checkbox' />
+                      )}
+                    />
+                  </Col>
                     <Col sm='12' className='mb-2'>
                       <Label className='form-label'>Content</Label>
                       <Controller
@@ -224,7 +234,9 @@ const BlogEdit = () => {
                         {isSubmitting ? 'Uploading Changes' : 'Save Changes'}
                       </Button>
                       <Button color='secondary' outline className='me-1'>
-                        Cancel
+                        <Link to={'/pages/blog/list'}>
+                          Cancel
+                        </Link>
                       </Button>
                       <Button color='secondary' outline onClick={handleDelete}>
                         Delete

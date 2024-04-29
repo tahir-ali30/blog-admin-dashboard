@@ -19,7 +19,7 @@ import '@styles/react/libs/editor/editor.scss'
 import '@styles/base/plugins/forms/form-quill-editor.scss'
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ComponentSpinner from '../../../../@core/components/spinner/Loading-spinner'
 import SpinnerComponent from '../../../../@core/components/spinner/Fallback-spinner'
 import { Controller, useForm } from 'react-hook-form'
@@ -38,8 +38,8 @@ const CategoryEdit = () => {
   const { handleSubmit, control, formState: { isSubmitting }, reset } = useForm();
 
   useEffect(() => {
-    axios.get(`/api/v1/category/${categoryName}`)
-      .then(res => res.data.data)
+    asyncHandler(axios.get)(`/api/v1/category/${categoryName}`)
+      .then(res => res.data)
       .then(category => {
         reset(category)
         setFeaturedImg(category.category_img)
@@ -163,7 +163,7 @@ const CategoryEdit = () => {
                         {isSubmitting ? 'Uploading Changes' : 'Save Changes'}
                       </Button>
                       <Button color='secondary' outline className='me-1'>
-                        Cancel
+                        <Link to={'/pages/category/list'}>Cancel</Link>
                       </Button>
                       <Button color='secondary' outline onClick={handleDelete}>
                         Delete

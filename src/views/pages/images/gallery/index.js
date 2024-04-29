@@ -42,6 +42,11 @@ const ImageGallery = () => {
       .then(images => setData(images))
   }, [])
 
+  async function deleteImage(public_id) {
+    const { message } = await asyncHandler(axios.delete)(`/api/v1/images/${public_id}`);
+    alert(message)
+  }
+
   const badgeColorsArr = {
     Quote: 'light-info',
     Fashion: 'light-primary',
@@ -53,32 +58,14 @@ const ImageGallery = () => {
     return data.map(item => {
       return (
         <Col key={item._id} md='6'>
-          <Card>
+          <Card className={'deleteCard'}>
+            <span onClick={() => deleteImage(item.public_id)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="2.5rem" height="2.5rem" viewBox="0 0 24 24">
+                <path fill="red" d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z" />
+              </svg>
+            </span>
             <CardImg className='img-fluid' src={item.url} alt={item._id} top onClick={() => navigator.clipboard.writeText(item.url)
               .then(() => alert('Copied url to clipboard'))} />
-            {/* <Link to={`/pages/category/detail/${item.name}`}>
-            </Link>
-            <CardBody>
-              <CardTitle tag='h4'>
-                <Link className='blog-title-truncate text-body-heading' to={`/pages/category/detail/${item.name}`}>
-                  {titleFormat(item.name)}
-                </Link>
-              </CardTitle>
-              <div className='my-1 py-25'>{renderTags()}</div>
-              <div className='mt-1 pt-25'>Description:</div>
-              <div className='my-1 py-20'>{item.description}</div>
-              <CardText className='blog-content-truncate'>{item.excerpt}</CardText>
-              <hr />
-              <div className='d-flex justify-content-between align-items-center'>
-                <Link to={`/pages/blog/detail/${item.id}`}>
-                  <MessageSquare size={15} className='text-body me-50' />
-                  <span className='text-body fw-bold'>{item.comment} Comments</span>
-                </Link>
-                <Link className='fw-bold' to={`/pages/blog/detail/${item._id}`}>
-                  Read More
-                </Link>
-              </div>
-            </CardBody> */}
           </Card>
         </Col>
       )

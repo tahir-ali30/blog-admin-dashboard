@@ -21,6 +21,7 @@ import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/base/pages/page-blog.scss'
 import { asyncHandler } from '../../../../utility/Utils'
 import { Controller, useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 
 const CategoryAdd = () => {
   // ** States
@@ -140,7 +141,7 @@ const CategoryAdd = () => {
                         {isSubmitting ? 'Uploading Category' : 'Add Category'}
                       </Button>
                       <Button color='secondary' outline>
-                        Cancel
+                        <Link to={'/pages/category/list'}>Cancel</Link>
                       </Button>
                     </Col>
                   </Row>

@@ -85,9 +85,9 @@ export const selectThemeColors = theme => ({
 
 
 // ** axios request handler
-export const asyncHandler = (fn) => async (url, dataToSend) => {
+export const asyncHandler = (fn) => async (url, dataToSend = null, options = {}) => {
   try {
-    const { data } = await fn(url, dataToSend);
+    const { data } = await fn(url, dataToSend, options);
     return data;
   } catch (error) {
     alert(error.response.data.message || 'Server is not responding');

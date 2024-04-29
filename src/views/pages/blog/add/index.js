@@ -27,13 +27,14 @@ import '@styles/base/pages/page-blog.scss'
 import { useSelector } from 'react-redux'
 import { asyncHandler, titleFormat } from '../../../../utility/Utils'
 import { Controller, useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 
 const BlogAdd = () => {
   const editorState = EditorState.createEmpty()
 
   // ** States
   const [data, setData] = useState(null),
-    [featuredImg, setFeaturedImg] = useState(null),
+    [featured_img, setFeaturedImg] = useState(null),
     [imgPath, setImgPath] = useState('banner.jpg'),
     [categories, setCategories] = useState([])
   
@@ -54,8 +55,8 @@ const BlogAdd = () => {
   }
 
   async function onSubmitHandler(data) {
-    const blogContent = draftToHtml(convertToRaw(data.content.getCurrentContent()))
-    const { message } = await asyncHandler(axios.postForm)('/api/v1/blogs', { ...data, content: blogContent, category: blogCategory.value });
+    const content = draftToHtml(convertToRaw(data.content.getCurrentContent()))
+    const { message } = await asyncHandler(axios.postForm)('/api/v1/blogs', { ...data, content, category: data.blogCategory.value, featured_img });
     alert(message)
     }
 
@@ -139,7 +140,17 @@ const BlogAdd = () => {
                           <option value='Draft'>Draft</option>
                       </Input>
                       )} />
-                      </Col>
+                  </Col>
+                  <Col md='6' className={'mb-2'}>
+                    <Label className={'form-label'}>Featured Blog</Label>
+                    <Controller
+                      name='featured'
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type='checkbox' />
+                      )}
+                    />
+                  </Col>
                     <Col sm='12' className='mb-2'>
                     <Label className='form-label'>Content</Label>
                     <Controller
@@ -157,7 +168,7 @@ const BlogAdd = () => {
                         <div className='d-flex flex-column flex-md-row'>
                           <img
                             className='rounded me-2 mb-1 mb-md-0'
-                            src={featuredImg ? URL.createObjectURL(featuredImg) : ''}
+                            src={featured_img ? URL.createObjectURL(featured_img) : ''}
                             alt='featured img'
                             width='170'
                             height='110'
@@ -189,8 +200,10 @@ const BlogAdd = () => {
                       <Button color='primary' className='me-1' disabled={isSubmitting}>
                         {isSubmitting ? 'Uploading Blog' : 'Add Blog'}
                       </Button>
-                      <Button color='secondary' outline>
+                    <Button color='secondary' outline>
+                      <Link to={'/pages/blog/list'}>
                         Cancel
+                      </Link>
                       </Button>
                     </Col>
                   </Row>
